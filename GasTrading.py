@@ -50,5 +50,9 @@ ax2.set_xticklabels(['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Se
 ax2.grid(True, axis='y', alpha=0.3)
 
 plt.tight_layout()
-print("Analisi completata. Guarda come i prezzi si muovono d'inverno!")
+plt.tight_layout()
+
+# Output console tecnico
+print("Data fetching: Complete.")
+print("Seasonality Analysis: Generated.")
 plt.show()

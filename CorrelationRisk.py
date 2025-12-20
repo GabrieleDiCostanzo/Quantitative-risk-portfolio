@@ -34,12 +34,13 @@ plt.axhline(0, color='black', linestyle='--', linewidth=1)
 plt.fill_between(rolling_corr.index, 0, rolling_corr, where=(rolling_corr > 0), color='red', alpha=0.3, label='RISCHIO: Correlazione Positiva (Stocks & Bonds giù insieme)')
 plt.fill_between(rolling_corr.index, 0, rolling_corr, where=(rolling_corr < 0), color='green', alpha=0.3, label='SAFE: Diversificazione Efficace')
 
-# Titoli e legende
-plt.title('Risk Monitor: Analisi Correlazione (Equity vs Bond)', fontsize=14)
-plt.ylabel('Correlazione (Rolling 60gg)', fontsize=12)
+# Titoli e legende professionali
+plt.title('Cross-Asset Risk Monitor: Equity (SPY) vs Treasuries (TLT) Rolling Correlation', fontsize=14)
+plt.ylabel('Correlation Coeff (60-day Rolling)', fontsize=12)
 plt.legend(loc='upper left')
 plt.grid(True, alpha=0.3)
 
-print(f"Dati scaricati fino a oggi.")
-print("Grafico generato! Se vedi rosso nel 2022/2023, il modello funziona.")
+# Output console pulito
+print(f"Dataset scaricato: {len(data)} osservazioni.")
+print("Analisi completata. Visualizzazione grafico...")
 plt.show()

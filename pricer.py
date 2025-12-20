@@ -1,49 +1,67 @@
 import numpy as np
-import matplotlib.pyplot as plt # Importiamo il "pittore"
+import matplotlib.pyplot as plt
 from scipy.stats import norm
 
-# --- 1. IL MOTORE (Sempre lo stesso) ---
+# --- 1. PRICING ENGINE (Black-Scholes Model) ---
 def risk_engine(S, K, T, r, sigma, option_type='call'):
+    """
+    Calculates Option Price and Greeks (Delta, Gamma).
+    """
     d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
     d2 = d1 - sigma * np.sqrt(T)
     
     if option_type == 'call':
         price = (S * norm.cdf(d1)) - (K * np.exp(-r * T) * norm.cdf(d2))
+        delta = norm.cdf(d1)
     else:
         price = (K * np.exp(-r * T) * norm.cdf(-d2)) - (S * norm.cdf(-d1))
-    return price
+        delta = norm.cdf(d1) - 1
+        
+    # Gamma (Same for Call and Put)
+    gamma = norm.pdf(d1) / (S * sigma * np.sqrt(T))
+    
+    return price, delta, gamma
 
-# --- 2. GENERAZIONE DEL GRAFICO ---
+# --- 2. MAIN EXECUTION ---
 if __name__ == "__main__":
-    # Parametri fissi
-    K = 100
-    T = 1.0
-    r = 0.05
-    sigma = 0.20
+    # Market Parameters
+    spot_example = 100  # Current Spot Price
+    strike = 100
+    expiry = 1.0        # 1 Year
+    rate = 0.05         # 5% Risk-free rate
+    vol = 0.20          # 20% Volatility
 
-    # Genero 100 prezzi spot diversi: da 80 a 120
-    # È come fare uno "Stress Test" simulando vari scenari di mercato
-    spot_prices = np.linspace(80, 120, 100) 
+    # A. SINGLE POINT CALCULATION (For Console Output)
+    price, delta, gamma = risk_engine(spot_example, strike, expiry, rate, vol, 'call')
+
+    # B. SIMULATION FOR PLOTTING (Gamma/Convexity View)
+    spot_range = np.linspace(80, 120, 100)
     option_prices = []
-
-    # Calcolo il prezzo dell'opzione per ogni scenario
-    for S in spot_prices:
-        p = risk_engine(S, K, T, r, sigma, 'call')
+    
+    for S in spot_range:
+        p, d, g = risk_engine(S, strike, expiry, rate, vol, 'call')
         option_prices.append(p)
 
-    # Disegno il grafico
+    # --- 3. PROFESSIONAL OUTPUT ---
+    print(f"--- BLACK-SCHOLES PRICING REPORT ---")
+    print(f"Underlying: {spot_example} | Strike: {strike}")
+    print(f"Maturity:   {expiry} Yr  | Volatility: {vol:.1%}")
+    print(f"------------------------------------")
+    print(f"Fair Value: {price:.4f} EUR")
+    print(f"Delta:      {delta:.4f}")
+    print(f"Gamma:      {gamma:.4f}")
+    print(f"------------------------------------")
+    print("Generating Convexity Plot...")
+
+    # Plotting
     plt.figure(figsize=(10, 6))
-    plt.plot(spot_prices, option_prices, label='Prezzo Call Option', color='blue', linewidth=2)
+    plt.plot(spot_range, option_prices, label='Call Option Value', color='blue', linewidth=2)
+    plt.axvline(x=strike, color='red', linestyle='--', alpha=0.5, label='Strike Price')
     
-    # Aggiungo linea dello Strike e del Payoff intrinseco (facoltativo, per bellezza)
-    plt.axvline(x=K, color='red', linestyle='--', label='Strike Price (100€)')
+    plt.title('Derivatives Pricing: Payoff & Convexity Profile', fontsize=14)
+    plt.xlabel('Underlying Spot Price', fontsize=12)
+    plt.ylabel('Option Theoretical Value', fontsize=12)
+    plt.legend()
     plt.grid(True, alpha=0.3)
     
-    # Etichette
-    plt.title('Profilo di Prezzo Call Option (Convessità)', fontsize=14)
-    plt.xlabel('Prezzo del Sottostante (Spot)', fontsize=12)
-    plt.ylabel('Prezzo Opzione (€)', fontsize=12)
-    plt.legend()
-    
-    print("Grafico generato! Guarda la finestra che si è aperta.")
     plt.show()
